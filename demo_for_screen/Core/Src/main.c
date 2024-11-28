@@ -50,6 +50,7 @@ u8 STATE[30];
 UART_HandleTypeDef huart1;
 int speed = 0;                 // 跑步速度
 int initial_speed = 5;
+int x1,x2,y1,y2; //障碍物坐标
 
 /* USER CODE END PD */
 
@@ -155,11 +156,11 @@ void screen_norm_print(u16 x, u16 y){
 	LCD_ShowString(lcddev.width-40,lcddev.height-100,200,16,16,"Right");
 	LCD_ShowString(lcddev.width-40,lcddev.height-180,200,16,16,"Left");
 	//随机生成障碍物,TODO:完成随机逻辑
-	int x1 = lcddev.width/2 - 30;
-	int y1 = lcddev.height/2 + 10;
+	x1 = lcddev.width/2 - 30;
+	y1 = lcddev.height/2 + 10;
 	LCD_DrawRectangle(x1,y1,x1+40,y1+30);
-	int x2 = lcddev.width/2 - 80;
-	int y2 = lcddev.height/2 - 140;
+	x2 = lcddev.width/2 - 80;
+	y2 = lcddev.height/2 - 140;
 	LCD_DrawRectangle(x2,y2,x2+40,y2+30);
 }
 
@@ -217,6 +218,9 @@ int max(int a,int b){
 int min(int a, int b){
 	return a < b ? a : b;
 }
+int hit(int x, int y, u16 x_coordinate, u16 y_coordinate){
+	return ((x_coordinate >= (x - 20) && y_coordinate >= (y - 20)) && (x_coordinate <= (x + 40 + 20) && (y_coordinate <= (y + 30 + 20))));
+}
 void rtp_test(void)
 {
 	u8 key;
@@ -230,6 +234,8 @@ void rtp_test(void)
 	u16 y_coordinate = lcddev.height - 30;
 	u32 time_slot[2] = {0,0};
 	u8 bit = 0;
+	u8 escape_flag = 0;
+	u8 escape_lock = 0;
 	while(1)
 	{
 	 	key=KEY_Scan(0);
@@ -237,10 +243,29 @@ void rtp_test(void)
 		screen_norm_print(x_coordinate,y_coordinate);
 		if(tp_dev.sta&TP_PRES_DOWN)			//触摸屏被按下
 		{
+			escape_lock = 1;
 			if(tp_dev.x[0]<lcddev.width&&tp_dev.y[0]<lcddev.height){
 			if (tp_dev.x[0] > lcddev.width - 45 && tp_dev.y[0] > lcddev.height - 25){
 				//跳跃
 				LED1 = !LED1;
+				//改变颜色
+				LCD_Clear_Circle(x_coordinate,y_coordinate,20,WHITE);
+				LCD_Clear_Circle(x_coordinate,y_coordinate,20,BLUE);
+				HAL_Delay(1000);
+				LCD_Clear_Circle(x_coordinate,y_coordinate,20,WHITE);
+				if(y_coordinate - 30 > 20){
+					y_coordinate -= 92;
+					if ((y_coordinate + 92 <= y1 + 70 && y_coordinate + 92 > y1 + 50 && x_coordinate >= x1 - 20 && x_coordinate <= x1 + 60 )|| (y_coordinate + 92 <= y2 + 55 && y_coordinate + 92 > y2 + 50 && x_coordinate >= x1 -20 && x_coordinate <= x1 + 60)){
+						//过晚跳跃会撞到障碍物
+						y_coordinate += 92;
+						speed = 0;
+						LCD_Clear(WHITE);
+						POINT_COLOR = RED;
+						LCD_ShowString(lcddev.width/2,lcddev.height/2,300,24,24,"HIT!");
+						HAL_Delay(1000);
+						LCD_Clear(WHITE);
+					}
+				}
 			}
 			else if(tp_dev.x[0] > lcddev.width - 45 && tp_dev.y[0] > lcddev.height - 105 && tp_dev.y[0] <= lcddev.height - 25){
 				//向右移动
@@ -301,6 +326,10 @@ void rtp_test(void)
 			}
 		}
 		else {
+			if(escape_lock == 1){
+				escape_flag = 0;
+				escape_lock = 0;
+			}
 			if(!flag){
 				flag = 1;
 				stop_time = HAL_GetTick();
@@ -321,7 +350,19 @@ void rtp_test(void)
 				 			if(speed >0) speed =0;
 				 		}
 
-				 	}
+			}
+		//判断是否撞到障碍物
+		if ((hit(x1,y1,x_coordinate,y_coordinate) || hit(x2,y2,x_coordinate,y_coordinate)) && !escape_flag){
+			speed = 0;
+			escape_flag = 1; //等待触摸后将escape_flag重新置为0
+			escape_lock = 0;
+			LCD_Clear(WHITE);
+			POINT_COLOR = RED;
+			LCD_ShowString(lcddev.width/2,lcddev.height/2,300,24,24,"HIT!");
+			HAL_Delay(1000);
+			LCD_Clear(WHITE);
+
+		}
 		if(key==KEY0_PRES)	//KEY0按下,则执行校准程�???
 		{
 			LCD_Clear(WHITE);	//清屏

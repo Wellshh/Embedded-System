@@ -3594,3 +3594,5 @@ java.lang.NullPointerException: Cannot invoke "javax.swing.JTextField.getText()"
 2024-11-28 16:32:41,242 [ERROR] LogOutputStream:75 - [STDERR_REDIRECT] 	at java.desktop/java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:109)
 2024-11-28 16:32:41,243 [ERROR] LogOutputStream:75 - [STDERR_REDIRECT] 	at java.desktop/java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:101)
 2024-11-28 16:32:41,244 [ERROR] LogOutputStream:75 - [STDERR_REDIRECT] 	at java.desktop/java.awt.EventDispatchThread.run(EventDispatchThread.java:90)
+2024-11-28 22:54:32,954 [ERROR] LogOutputStream:75 - [STDERR_REDIRECT] 
+2024-11-28 22:54:32,955 [ERROR] LogOutputStream:75 - [STDERR_REDIRECT] 

@@ -1,28 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <section name="Workbench">
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
-		<item key="selection" value="i"/>
+		<item key="selection" value="initial_speed"/>
 		<item key="wrap" value="true"/>
 		<item key="casesensitive" value="true"/>
 		<item key="wholeword" value="false"/>
 		<item key="incremental" value="false"/>
 		<item key="isRegEx" value="false"/>
 		<list key="findhistory">
+			<item value="initial_speed"/>
+			<item value="LCD_ShowString"/>
+			<item value="speed"/>
+			<item value="Draw"/>
+			<item value="Draw_Point"/>
+			<item value="y_coordinate"/>
+			<item value="x_coordinate"/>
+			<item value="htim2"/>
+			<item value="screen_norm_print"/>
+			<item value="state_num"/>
+			<item value="lcd_draw_bline"/>
 			<item value="i"/>
 			<item value="key"/>
 			<item value="KEY_Scan"/>
 			<item value="LCD"/>
-			<item value="cpy"/>
-			<item value="str"/>
-			<item value="lcd_showpic"/>
-			<item value="lcd_show_"/>
-			<item value="UART_RX"/>
-			<item value="UART"/>
-			<item value="or_data"/>
-			<item value="ReadPin"/>
-			<item value="RED"/>
-			<item value="HAL_GPIO_EXTI"/>
-			<item value="LED0"/>
 		</list>
 		<list key="replacehistory">
 		</list>
