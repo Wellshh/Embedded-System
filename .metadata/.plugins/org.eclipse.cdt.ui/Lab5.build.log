@@ -1,0 +1,46 @@
+10:54:09 **** Incremental Build of configuration Debug for project Lab5 ****
+make -j20 all 
+arm-none-eabi-gcc "../Core/Src/stm32f1xx_it.c" -mcpu=cortex-m3 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F103xE -c -I../Core/Inc -I../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I../Drivers/STM32F1xx_HAL_Driver/Inc -I../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/stm32f1xx_it.d" -MT"Core/Src/stm32f1xx_it.o" --specs=nano.specs -mfloat-abi=soft -mthumb -o "Core/Src/stm32f1xx_it.o"
+In file included from ../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f1xx.h:132,
+                 from ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_def.h:29,
+                 from ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_rcc.h:27,
+                 from ../Core/Inc/stm32f1xx_hal_conf.h:238,
+                 from ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h:29,
+                 from ../Core/Inc/main.h:30,
+                 from ../Core/Src/stm32f1xx_it.c:21:
+../Core/Src/stm32f1xx_it.c: In function 'HAL_GPIO_EXTI_Callback':
+../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f103xe.h:858:29: warning: passing argument 2 of 'HAL_GPIO_WritePin' makes integer from pointer without a cast [-Wint-conversion]
+  858 | #define GPIOA               ((GPIO_TypeDef *)GPIOA_BASE)
+      |                             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      |                             |
+      |                             GPIO_TypeDef *
+../Core/Inc/main.h:67:24: note: in expansion of macro 'GPIOA'
+   67 | #define LED0_GPIO_Port GPIOA
+      |                        ^~~~~
+../Core/Src/stm32f1xx_it.c:251:59: note: in expansion of macro 'LED0_GPIO_Port'
+  251 |                         HAL_GPIO_WritePin(LED0_GPIO_Port, LED0_GPIO_Port, GPIO_PIN_RESET);
+      |                                                           ^~~~~~~~~~~~~~
+In file included from ../Core/Inc/stm32f1xx_hal_conf.h:242:
+../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_gpio.h:234:54: note: expected 'uint16_t' {aka 'short unsigned int'} but argument is of type 'GPIO_TypeDef *'
+  234 | void HAL_GPIO_WritePin(GPIO_TypeDef *GPIOx, uint16_t GPIO_Pin, GPIO_PinState PinState);
+      |                                             ~~~~~~~~~^~~~~~~~
+arm-none-eabi-gcc -o "Lab5.elf" @"objects.list"   -mcpu=cortex-m3 -T"D:\STM32\Lab5\STM32F103RCTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Lab5.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+Finished building target: Lab5.elf
+ 
+arm-none-eabi-size  Lab5.elf 
+arm-none-eabi-objdump -h -S Lab5.elf  > "Lab5.list"
+   text	   data	    bss	    dec	    hex	filename
+  45084	     16	   1584	  46684	   b65c	Lab5.elf
+arm-none-eabi-objcopy  -O ihex Lab5.elf  "Lab5.hex"
+Finished building: default.size.stdout
+arm-none-eabi-objcopy  -O binary Lab5.elf  "Lab5.bin"
+ 
+Finished building: Lab5.hex
+Finished building: Lab5.list
+ 
+Finished building: Lab5.bin
+ 
+ 
+
+10:54:10 Build Finished. 0 errors, 1 warnings. (took 980ms)
+

@@ -1,0 +1,3 @@
+../Core/Src/KEY.c:15:6:Key_Config	1
+../Core/Src/KEY.c:28:6:Key_ParaInit	1
+../Core/Src/KEY.c:36:6:Key_Scan	26

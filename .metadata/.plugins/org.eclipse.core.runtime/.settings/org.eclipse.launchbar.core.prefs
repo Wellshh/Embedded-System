@@ -1,0 +1,11 @@
+LaunchTargetManager/org.eclipse.launchbar.core.launchTargetType.local,Local/arch=x86_64
+LaunchTargetManager/org.eclipse.launchbar.core.launchTargetType.local,Local/name=Local
+LaunchTargetManager/org.eclipse.launchbar.core.launchTargetType.local,Local/os=win32
+configDescList=org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:Lab2_2_SID Debug,org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:Lab3,org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:Lab_assignment3 Debug,org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:demo_for_lab Debug,org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:demo_for_lab Release,org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:i2c_lcd767 Debug
+eclipse.preferences.version=1
+org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:Lab2_2_SID\ Debug/activeLaunchMode=run
+org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:Lab2_2_SID\ Debug/activeLaunchTarget=null\:---
+org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:Lab_assignment3\ Debug/activeLaunchMode=debug
+org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:demo_for_lab\ Debug/activeLaunchMode=run
+org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:demo_for_lab\ Debug/activeLaunchTarget=null\:---
+org.eclipse.launchbar.core.descriptorType.default\:demo_for_lab\ Release/activeLaunchTarget=org.eclipse.launchbar.core.launchTargetType.local\:Local

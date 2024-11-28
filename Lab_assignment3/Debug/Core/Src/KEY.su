@@ -1,0 +1,4 @@
+../Core/Src/KEY.c:16:6:Key_Config	4	static
+../Core/Src/KEY.c:29:6:Key_ParaInit	16	static
+../Core/Src/KEY.c:37:6:Key_Scan	16	static
+../Core/Src/KEY.c:169:6:Key_Debug	32	static

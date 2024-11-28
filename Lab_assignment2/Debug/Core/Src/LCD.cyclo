@@ -1,0 +1,3 @@
+../Core/Src/LCD.c:11:6:lcd_divide	1
+../Core/Src/LCD.c:18:6:lcd_picture_mode	2
+../Core/Src/LCD.c:33:6:lcd_clear_area	2

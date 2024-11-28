@@ -1,0 +1,27 @@
+11:59:33 **** Incremental Build of configuration Debug for project Lab10 ****
+make -j20 all 
+arm-none-eabi-gcc "../Core/Src/main.c" -mcpu=cortex-m3 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F103xE -c -I../Core/Inc -I../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I../Drivers/STM32F1xx_HAL_Driver/Inc -I../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/main.d" -MT"Core/Src/main.o" --specs=nano.specs -mfloat-abi=soft -mthumb -o "Core/Src/main.o"
+../Core/Src/main.c: In function 'main':
+../Core/Src/main.c:103:7: warning: unused variable 'mode' [-Wunused-variable]
+  103 |   int mode = 1;
+      |       ^~~~
+arm-none-eabi-gcc -o "Lab10.elf" @"objects.list"   -mcpu=cortex-m3 -T"D:\STM32\Lab10\STM32F103RCTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Lab10.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+Finished building target: Lab10.elf
+ 
+arm-none-eabi-size  Lab10.elf 
+arm-none-eabi-objdump -h -S Lab10.elf  > "Lab10.list"
+   text	   data	    bss	    dec	    hex	filename
+  10056	     12	   1716	  11784	   2e08	Lab10.elf
+arm-none-eabi-objcopy  -O ihex Lab10.elf  "Lab10.hex"
+Finished building: default.size.stdout
+arm-none-eabi-objcopy  -O binary Lab10.elf  "Lab10.bin"
+ 
+Finished building: Lab10.list
+Finished building: Lab10.hex
+ 
+ 
+Finished building: Lab10.bin
+ 
+
+11:59:34 Build Finished. 0 errors, 1 warnings. (took 965ms)
+

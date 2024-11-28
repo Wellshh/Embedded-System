@@ -1,0 +1,10 @@
+11:39:48 **** Incremental Build of configuration Release for project demo_for_lab ****
+make -j20 all 
+arm-none-eabi-size  demo_for_lab.elf 
+   text	   data	    bss	    dec	    hex	filename
+   3252	     20	   1572	   4844	   12ec	demo_for_lab.elf
+Finished building: default.size.stdout
+ 
+
+11:39:49 Build Finished. 0 errors, 0 warnings. (took 527ms)
+

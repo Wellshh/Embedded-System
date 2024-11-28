@@ -1,0 +1,16 @@
+/*
+ * lcd.c
+ *
+ *  Created on: Oct 17, 2024
+ *      Author: Wells
+ */
+
+#include "lcd_v4.h"
+#include "LCD.h"
+
+void lcd_divide(){
+	//three lines
+	lcd_fill(0,lcddev.height/5, lcddev.width,lcddev.height/5,BLACK);
+	lcd_fill(0,2 * lcddev.height/5, lcddev.width,2 * lcddev.height/5, BLACK);
+	lcd_fill(0, 3 * lcddev.height/5, lcddev.width,3 * lcddev.height/5,  BLACK);
+}
