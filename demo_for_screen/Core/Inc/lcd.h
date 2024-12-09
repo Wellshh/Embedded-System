@@ -144,6 +144,10 @@ void LCD_Set_Window(u16 sx, u16 sy, u16 width, u16 height); //���ô���
 void LCD_ShowPicture(uint16_t x,uint16_t y,uint16_t column,uint16_t row,unsigned short *pic);
 void LCD_Clear_Circle(u16 x0, u16 y0, u8 r, u16 color);
 void LCD_Clear_Rectangle(u16 x1, u16 y1, u16 width, u16 height, u16 color);
+void LCD_Draw_Triangle(u16 x0, u16 y0, u16 x1, u16 y1, u16 x2, u16 y2);
+//void LCD_Clear_Shape(u16 x0, u16 y0, u16 color, u8 shape);
+void LCD_Draw_Ellipse(u16 x0, u16 y0, u16 rx, u16 ry); // 需要实现或确保存在
+
 //д���ݺ���
 #define LCD_WR_DATA(data){\
         LCD_RS_SET;\

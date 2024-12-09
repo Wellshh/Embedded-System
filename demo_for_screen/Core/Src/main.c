@@ -34,11 +34,65 @@
 #include "touch.h"
 #include "24cxx.h"
 #include "24l01.h" //通信驱动 基于spi进行通信
+#include <stdlib.h>
+#include <time.h>
+#include <math.h>
+#include <stdint.h>
 //#include "remote.h" 红外遥控驱动
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
+// 玩家形状尺寸
+#define PLAYER_CIRCLE_RADIUS 20
+#define PLAYER_RECT_WIDTH 40
+#define PLAYER_RECT_HEIGHT 30
+#define PLAYER_TRIANGLE_SIZE 40 // 假设为等边三角形，高度为40
+
+// 障碍物形状尺寸
+#define OBSTACLE_RECT_WIDTH 40
+#define OBSTACLE_RECT_HEIGHT 30
+#define OBSTACLE_CIRCLE_RADIUS 20
+#define OBSTACLE_TRIANGLE_SIZE 40 // 假设为等边三角形，高度为40
+#define MAX_OBSTACLES 4
+typedef enum {
+    SCENE_RUNNING,
+    SCENE_SWIMMING,
+    SCENE_ROWING,
+    SCENE_MINING,
+    SCENE_COUNT // 场景总数
+} SceneType;
+
+typedef enum {
+    SHAPE_CIRCLE = 0,
+    SHAPE_TRIANGLE,
+    SHAPE_RECTANGLE,
+    SHAPE_JUMP_ELLIPSE,      // 3
+    SHAPE_JUMP_TRIANGLE_REVERSE, // 4
+    SHAPE_JUMP_RECTANGLE_SMALL    // 5
+} ShapeType;
+
+ShapeType shape = SHAPE_CIRCLE;
+
+
+
+
+// 当前场景
+SceneType current_scene = SCENE_RUNNING;
+int hit(int x, int y, u16 x_coordinate, u16 y_coordinate, ShapeType shape, int obstacle_shape);
+typedef struct {
+    u16 x;
+    u16 y;
+    u8 type; // 障碍物类型，根据场景不同可能有不同的表现
+} Obstacle;
+
+typedef enum {
+    PLAYER_STATE_IDLE = 0,
+    PLAYER_STATE_JUMPING,
+    // 其他状态...
+} PlayerState;
+PlayerState player_state = PLAYER_STATE_IDLE;
+Obstacle obstacles[MAX_OBSTACLES];
 
 /* USER CODE END PTD */
 
@@ -50,12 +104,436 @@ u8 STATE[30];
 UART_HandleTypeDef huart1;
 int speed = 0;                 // 跑步速度
 int initial_speed = 5;
-int x1,x2,y1,y2; //障碍物坐标
-
+u8 counter = 0;
+//int x1,x2,y1,y2; //障碍物坐标
+u16 background_color = WHITE;
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
+void LCD_Draw_Shape(u16 x, u16 y, ShapeType shape) {
+    switch(shape) {
+        case SHAPE_CIRCLE:
+            LCD_Draw_Circle(x, y, PLAYER_CIRCLE_RADIUS);
+            break;
+        case SHAPE_TRIANGLE:
+            LCD_Draw_Triangle(x - 20, y + 20, x, y - 20, x + 20, y + 20);
+            break;
+        case SHAPE_RECTANGLE:
+            LCD_DrawRectangle(x - 20, y - 15, x + 20, y + 15);
+            break;
+        case SHAPE_JUMP_ELLIPSE:
+            LCD_Draw_Ellipse(x, y, 30, 15); // 确保有此函数
+            break;
+        case SHAPE_JUMP_TRIANGLE_REVERSE:
+            LCD_Draw_Triangle(x - 20, y - 20, x, y + 20, x + 20, y - 20);
+            break;
+        case SHAPE_JUMP_RECTANGLE_SMALL:
+            LCD_DrawRectangle(x - 10, y - 7, x + 10, y + 7);
+            break;
+        default:
+            break;
+    }
+}
+
+void LCD_Clear_Shape(u16 x, u16 y, u16 background_color, ShapeType shape) {
+    POINT_COLOR = background_color;
+    LCD_Draw_Shape(x, y, shape);
+}
+
+u16 perform_jump(u16 x, u16 y, ShapeType original_shape, ShapeType jump_shape, u16 background_color) {
+    // 清除原始形状
+    LCD_Clear_Shape(x, y, background_color, original_shape);
+    y-=10;
+
+    // 绘制跳跃形状
+    POINT_COLOR = RED;
+    LCD_Draw_Shape(x, y, jump_shape);
+
+    // 延迟
+    HAL_Delay(300);
+
+    // 清除跳跃形状
+    LCD_Clear_Shape(x, y, background_color, jump_shape);
+    POINT_COLOR = RED;
+
+    // 恢复原始形状
+    LCD_Draw_Shape(x, y, original_shape);
+    HAL_Delay(300);
+    return y;
+}
+
+// 修改后的跳跃分支
+u16 handle_jump(u16 x_coordinate, u16 y_coordinate, ShapeType current_shape, SceneType current_scene) {
+    // 跳跃
+    LED1 = !LED1;
+
+    ShapeType jump_shape = SHAPE_CIRCLE; // 默认值
+
+    // 根据当前场景和形状选择跳跃时的形状
+    switch(current_scene) {
+        case SCENE_RUNNING:
+            jump_shape = SHAPE_JUMP_ELLIPSE;
+            break;
+        case SCENE_SWIMMING:
+            // 例如，游泳场景的跳跃形状
+        	jump_shape = SHAPE_JUMP_ELLIPSE;
+            break;
+        case SCENE_ROWING:
+            // 例如，划船场景的跳跃形状
+            // jump_shape = SHAPE_JUMP_ROWING; // 需要定义
+        	jump_shape = SHAPE_JUMP_TRIANGLE_REVERSE;
+            break;
+        case SCENE_MINING:
+            // 例如，采矿场景的跳跃形状
+            // jump_shape = SHAPE_JUMP_MINING; // 需要定义
+        	jump_shape = SHAPE_JUMP_RECTANGLE_SMALL;
+            break;
+        default:
+            jump_shape = current_shape; // 默认不变
+            break;
+    }
+
+    // 执行跳跃动画
+
+    // 调整y坐标
+    if(y_coordinate - 30 > 20){
+        // 检查是否撞到障碍物
+        for(int i = 0; i < MAX_OBSTACLES; i++) {
+            if(hit(obstacles[i].x, obstacles[i].y, x_coordinate, y_coordinate - 90, current_shape, obstacles[i].type)) {
+                // 过晚跳跃会撞到障碍物
+                speed = 0;
+                LCD_Clear(background_color);
+                LCD_ShowString(lcddev.width / 2 - 150, lcddev.height / 2, 300, 24, 24, "You are dead!");
+                HAL_Delay(1000);
+                LCD_Clear(background_color);
+                LCD_DisplayOff();
+                return -1; // 发生碰撞后退出循环
+            }
+        }
+        u16 temp = y_coordinate;
+        y_coordinate -= 90;
+        while(temp > y_coordinate){
+        	temp = perform_jump(x_coordinate, temp, current_shape, jump_shape, background_color);
+        }
+        LCD_Clear(background_color);
+    }
+    return y_coordinate;
+}
+
+void init_random() {
+    srand(HAL_GetTick());
+}
+static inline float clampf(float value, float min, float max)
+{
+    if(value < min) return min;
+    if(value > max) return max;
+    return value;
+}
+static inline float distance_squared(float x1, float y1, float x2, float y2)
+{
+    float dx = x1 - x2;
+    float dy = y1 - y2;
+    return dx * dx + dy * dy;
+}
+/**
+ * @brief 检查点是否在三角形内
+ * @param px 点的X坐标
+ * @param py 点的Y坐标
+ * @param x0 三角形第一个顶点的X坐标
+ * @param y0 三角形第一个顶点的Y坐标
+ * @param x1 三角形第二个顶点的X坐标
+ * @param y1 三角形第二个顶点的Y坐标
+ * @param x2 三角形第三个顶点的X坐标
+ * @param y2 三角形第三个顶点的Y坐标
+ * @return 1表示点在三角形内，0表示不在
+ */
+int point_in_triangle(float px, float py, float x0, float y0, float x1, float y1, float x2, float y2)
+{
+    float denominator = ((y1 - y2)*(x0 - x2) + (x2 - x1)*(y0 - y2));
+    if (denominator == 0) return 0; // 三角形退化
+
+    float a = ((y1 - y2)*(px - x2) + (x2 - x1)*(py - y2)) / denominator;
+    float b = ((y2 - y0)*(px - x2) + (x0 - x2)*(py - y2)) / denominator;
+    float c = 1.0f - a - b;
+
+    return (a >= 0) && (b >= 0) && (c >= 0);
+}
+
+/**
+ * @brief 计算点到线段的最短距离
+ * @param px 点的X坐标
+ * @param py 点的Y坐标
+ * @param x1 线段起点的X坐标
+ * @param y1 线段起点的Y坐标
+ * @param x2 线段终点的X坐标
+ * @param y2 线段终点的Y坐标
+ * @return 点到线段的距离
+ */
+float distance_point_to_segment(float px, float py, float x1, float y1, float x2, float y2)
+{
+    float dx = x2 - x1;
+    float dy = y2 - y1;
+
+    if(dx == 0 && dy == 0) {
+        // 线段退化为一个点
+        return sqrtf(distance_squared(px, py, x1, y1));
+    }
+
+    float t = ((px - x1) * dx + (py - y1) * dy) / (dx * dx + dy * dy);
+    t = clampf(t, 0.0f, 1.0f);
+
+    float closest_x = x1 + t * dx;
+    float closest_y = y1 + t * dy;
+
+    return sqrtf(distance_squared(px, py, closest_x, closest_y));
+}
+/**
+ * @brief 检查圆形与矩形是否碰撞
+ * @param cx 圆心X坐标
+ * @param cy 圆心Y坐标
+ * @param radius 圆的半径
+ * @param rect_center_x 矩形中心X坐标
+ * @param rect_center_y 矩形中心Y坐标
+ * @param rect_width 矩形宽度
+ * @param rect_height 矩形高度
+ * @return 1表示碰撞，0表示不碰撞
+ */
+int circle_rectangle_collision(float cx, float cy, float radius, float rect_center_x, float rect_center_y, float rect_width, float rect_height)
+{
+    float rect_x = rect_center_x - rect_width / 2;
+    float rect_y = rect_center_y - rect_height / 2;
+
+    float closest_x = clampf(cx, rect_x, rect_x + rect_width);
+    float closest_y = clampf(cy, rect_y, rect_y + rect_height);
+
+    float dist_sq = distance_squared(cx, cy, closest_x, closest_y);
+
+    return (dist_sq <= (radius * radius));
+}
+/**
+ * @brief 检查两个圆形是否碰撞
+ * @param cx1 第一个圆心X坐标
+ * @param cy1 第一个圆心Y坐标
+ * @param r1 第一个圆的半径
+ * @param cx2 第二个圆心X坐标
+ * @param cy2 第二个圆心Y坐标
+ * @param r2 第二个圆的半径
+ * @return 1表示碰撞，0表示不碰撞
+ */
+int circle_circle_collision(float cx1, float cy1, float r1, float cx2, float cy2, float r2)
+{
+    float dist_sq = distance_squared(cx1, cy1, cx2, cy2);
+    float radii_sum_sq = (r1 + r2) * (r1 + r2);
+    return (dist_sq <= radii_sum_sq);
+}
+/**
+ * @brief 检查圆形与三角形是否碰撞
+ * @param cx 圆心X坐标
+ * @param cy 圆心Y坐标
+ * @param radius 圆的半径
+ * @param tx 三角形中心X坐标
+ * @param ty 三角形中心Y坐标
+ * @param size 三角形尺寸（假设为等边三角形，高度）
+ * @return 1表示碰撞，0表示不碰撞
+ */
+int circle_triangle_collision(float cx, float cy, float radius, float tx, float ty, float size)
+{
+    // 计算三角形的三个顶点坐标（假设为等边三角形，顶点朝上）
+    float h = size; // 高度
+    float half_base = size / 2.0f;
+
+    float x0 = tx;
+    float y0 = ty - (2.0f / 3.0f) * h;
+
+    float x1 = tx - half_base;
+    float y1 = ty + (1.0f / 3.0f) * h;
+
+    float x2 = tx + half_base;
+    float y2 = ty + (1.0f / 3.0f) * h;
+
+    // 检查圆心是否在三角形内
+    if(point_in_triangle(cx, cy, x0, y0, x1, y1, x2, y2)) return 1;
+
+    // 检查圆是否与三角形的任意一条边相交
+    if(distance_point_to_segment(cx, cy, x0, y0, x1, y1) <= radius) return 1;
+    if(distance_point_to_segment(cx, cy, x1, y1, x2, y2) <= radius) return 1;
+    if(distance_point_to_segment(cx, cy, x2, y2, x0, y0) <= radius) return 1;
+
+    return 0;
+}
+/**
+ * @brief 检查三角形与矩形是否碰撞
+ * @param tx 三角形中心X坐标
+ * @param ty 三角形中心Y坐标
+ * @param size 三角形尺寸（假设为等边三角形，高度）
+ * @param rx 矩形中心X坐标
+ * @param ry 矩形中心Y坐标
+ * @param rw 矩形宽度
+ * @param rh 矩形高度
+ * @return 1表示碰撞，0表示不碰撞
+ */
+int triangle_rectangle_collision(float tx, float ty, float size, float rx, float ry, float rw, float rh)
+{
+    // 计算三角形的三个顶点坐标（假设为等边三角形，顶点朝上）
+    float h = size; // 高度
+    float half_base = size / 2.0f;
+
+    float x0 = tx;
+    float y0 = ty - (2.0f / 3.0f) * h;
+
+    float x1 = tx - half_base;
+    float y1 = ty + (1.0f / 3.0f) * h;
+
+    float x2 = tx + half_base;
+    float y2 = ty + (1.0f / 3.0f) * h;
+
+    // 矩形的四个顶点
+    float rect_x_min = rx - rw / 2.0f;
+    float rect_y_min = ry - rh / 2.0f;
+    float rect_x_max = rx + rw / 2.0f;
+    float rect_y_max = ry + rh / 2.0f;
+
+    // 检查三角形的任意一个顶点是否在矩形内
+    if( (x0 >= rect_x_min && x0 <= rect_x_max && y0 >= rect_y_min && y0 <= rect_y_max) ||
+        (x1 >= rect_x_min && x1 <= rect_x_max && y1 >= rect_y_min && y1 <= rect_y_max) ||
+        (x2 >= rect_x_min && x2 <= rect_x_max && y2 >= rect_y_min && y2 <= rect_y_max) )
+        return 1;
+
+    // 检查矩形的任意一个顶点是否在三角形内
+    if(point_in_triangle(rect_x_min, rect_y_min, x0, y0, x1, y1, x2, y2)) return 1;
+    if(point_in_triangle(rect_x_max, rect_y_min, x0, y0, x1, y1, x2, y2)) return 1;
+    if(point_in_triangle(rect_x_max, rect_y_max, x0, y0, x1, y1, x2, y2)) return 1;
+    if(point_in_triangle(rect_x_min, rect_y_max, x0, y0, x1, y1, x2, y2)) return 1;
+
+    // 可选：检查三角形的边是否与矩形的边相交
+    // 为简化，暂不实现
+
+    return 0;
+}
+/**
+ * @brief 检查两个三角形是否碰撞
+ * @param tx1 第一个三角形的中心X坐标
+ * @param ty1 第一个三角形的中心Y坐标
+ * @param size1 第一个三角形的尺寸（假设为等边三角形，高度）
+ * @param tx2 第二个三角形的中心X坐标
+ * @param ty2 第二个三角形的中心Y坐标
+ * @param size2 第二个三角形的尺寸（假设为等边三角形，高度）
+ * @return 1表示碰撞，0表示不碰撞
+ */
+int triangle_triangle_collision(float tx1, float ty1, float size1, float tx2, float ty2, float size2)
+{
+    // 计算第一个三角形的三个顶点坐标（假设为等边三角形，顶点朝上）
+    float h1 = size1;
+    float half_base1 = size1 / 2.0f;
+
+    float x0_1 = tx1;
+    float y0_1 = ty1 - (2.0f / 3.0f) * h1;
+
+    float x1_1 = tx1 - half_base1;
+    float y1_1 = ty1 + (1.0f / 3.0f) * h1;
+
+    float x2_1 = tx1 + half_base1;
+    float y2_1 = ty1 + (1.0f / 3.0f) * h1;
+
+    // 计算第二个三角形的三个顶点坐标（假设为等边三角形，顶点朝上）
+    float h2 = size2;
+    float half_base2 = size2 / 2.0f;
+
+    float x0_2 = tx2;
+    float y0_2 = ty2 - (2.0f / 3.0f) * h2;
+
+    float x1_2 = tx2 - half_base2;
+    float y1_2 = ty2 + (1.0f / 3.0f) * h2;
+
+    float x2_2 = tx2 + half_base2;
+    float y2_2 = ty2 + (1.0f / 3.0f) * h2;
+
+    // 检查第一个三角形的任意一个顶点是否在第二个三角形内
+    if(point_in_triangle(x0_1, y0_1, x0_2, y0_2, x1_2, y1_2, x2_2, y2_2)) return 1;
+    if(point_in_triangle(x1_1, y1_1, x0_2, y0_2, x1_2, y1_2, x2_2, y2_2)) return 1;
+    if(point_in_triangle(x2_1, y2_1, x0_2, y0_2, x1_2, y1_2, x2_2, y2_2)) return 1;
+
+    // 检查第二个三角形的任意一个顶点是否在第一个三角形内
+    if(point_in_triangle(x0_2, y0_2, x0_1, y0_1, x1_1, y1_1, x2_1, y2_1)) return 1;
+    if(point_in_triangle(x1_2, y1_2, x0_1, y0_1, x1_1, y1_1, x2_1, y2_1)) return 1;
+    if(point_in_triangle(x2_2, y2_2, x0_1, y0_1, x1_1, y1_1, x2_1, y2_1)) return 1;
+
+    // 可选：检查两个三角形的边是否相交
+    // 为简化，暂不实现
+
+    return 0;
+}
+
+
+void generate_obstacles() {
+    for(int i = 0; i < MAX_OBSTACLES; i++) {
+        obstacles[i].x = rand() % (lcddev.width - 40) + 20; // 确保障碍物在屏幕内
+        obstacles[i].y = rand() % (lcddev.height - 100) + 50; // 避免生成在玩家初始位置
+        obstacles[i].type = rand() % 3; // 根据需要定义不同类型的障碍物
+    }
+}
+
+void draw_obstacles() {
+    for(int i = 0; i < MAX_OBSTACLES; i++) {
+        if(obstacles[i].type == 0) {
+            // 绘制矩形障碍物
+            LCD_DrawRectangle(obstacles[i].x, obstacles[i].y, obstacles[i].x + 40, obstacles[i].y + 30);
+        }
+        else if(obstacles[i].type == 1) {
+            // 绘制圆形障碍物
+            LCD_Draw_Circle(obstacles[i].x, obstacles[i].y, 20);
+        }
+        else if(obstacles[i].type == 2) {
+            // 绘制三角形障碍物（假设有此函数）
+            // 需要根据具体的LCD库实现绘制三角形
+             LCD_Draw_Triangle(obstacles[i].x-20,obstacles[i].y+20,obstacles[i].x,obstacles[i].y-20,obstacles[i].x+20,obstacles[i].y+20);
+        }
+    }
+}
+
+void draw_scene_background() {
+    switch(current_scene) {
+        case SCENE_RUNNING:
+            // 绘制跑步场景背景
+        	background_color = WHITE;
+        	shape = SHAPE_CIRCLE;
+            LCD_Clear(WHITE);
+            // 可以添加更多跑步场景的元素
+            break;
+        case SCENE_SWIMMING:
+            // 绘制游泳场景背景
+        	background_color = CYAN;
+            LCD_Clear(CYAN);
+            shape = SHAPE_CIRCLE;
+            // 可以添加更多游泳场景的元素
+            break;
+        case SCENE_ROWING:
+            // 绘制划船场景背景
+        	background_color = BLUE;
+            LCD_Clear(BLUE);
+            shape = SHAPE_TRIANGLE;
+            // 可以添加更多划船场景的元素
+            break;
+        case SCENE_MINING:
+            // 绘制采矿场景背景
+        	background_color = GRAY;
+            LCD_Clear(GRAY);
+            shape = SHAPE_RECTANGLE;
+            // 可以添加更多采矿场景的元素
+            break;
+        default:
+        	background_color = WHITE;
+            LCD_Clear(WHITE);
+            shape = SHAPE_CIRCLE;
+            break;
+    }
+}
+void switch_scene() {
+    current_scene = (current_scene + 1) % SCENE_COUNT;
+    draw_scene_background();
+    generate_obstacles();
+}
 //清空屏幕并在右上角显�???"RST"
 void Load_Drow_Dialog(void)
 {
@@ -128,40 +606,60 @@ void screen_print(){
 }
 
 void screen_draw_track(){
-	//画跑道虚�?
-	for (int i = 0; i <= lcddev.height - 50; i += 50){
-		LCD_DrawLine(lcddev.width/2,i,lcddev.width/2,i+30);
-	}
+    // 根据当前场景绘制不同的跑道
+    for (int i = 0; i <= lcddev.height - 50; i += 50){
+        if(current_scene == SCENE_RUNNING) {
+            POINT_COLOR = BLACK;
+        }
+        else if(current_scene == SCENE_SWIMMING) {
+            POINT_COLOR = BLUE;
+        }
+        else if(current_scene == SCENE_ROWING) {
+            POINT_COLOR = GREEN;
+        }
+        else if(current_scene == SCENE_MINING) {
+            POINT_COLOR = BROWN;
+        }
+        LCD_DrawLine(lcddev.width/2, i, lcddev.width/2, i + 30);
+    }
 }
 
 
 
+
 void screen_norm_print(u16 x, u16 y){
-	//TODO: 通过添加标志位来判断是否需要清屏
-	LCD_Clear_Rectangle(lcddev.width-150,30,200,16,WHITE);
-	LCD_Clear_Rectangle(lcddev.width-150,50,200,16,WHITE);
-	char speed_info[80];
-	sprintf(speed_info, "The speed is %d",speed);
-	POINT_COLOR = BLUE;
-	LCD_ShowString(lcddev.width-24,0,200,8,8,"RST");//显示清屏区域
-	screen_draw_track();
-	POINT_COLOR = RED;
-	LCD_Draw_Circle(x,y,20); //选手
-	LCD_ShowString(lcddev.width-150,30,200,16,16,speed_info);//显示当前速度
-	char initial_speed_info[80];
-	sprintf(initial_speed_info,"Initial speed is %d",initial_speed);
-	LCD_ShowString(lcddev.width-150,50,200,16,16,initial_speed_info); //显示初速度
-	//画互动按钮
-	LCD_ShowString(lcddev.width-40,lcddev.height-20,200,16,16,"Jump");
-	LCD_ShowString(lcddev.width-40,lcddev.height-100,200,16,16,"Right");
-	LCD_ShowString(lcddev.width-40,lcddev.height-180,200,16,16,"Left");
-	//随机生成障碍物,TODO:完成随机逻辑
-	x1 = lcddev.width/2 - 30;
-	y1 = lcddev.height/2 + 10;
-	LCD_DrawRectangle(x1,y1,x1+40,y1+30);
-	x2 = lcddev.width/2 - 80;
-	y2 = lcddev.height/2 - 140;
-	LCD_DrawRectangle(x2,y2,x2+40,y2+30);
+    LCD_Clear_Rectangle(lcddev.width-150,30,200,16,background_color);
+    LCD_Clear_Rectangle(lcddev.width-150,50,200,16,background_color);
+    char speed_info[80];
+    sprintf(speed_info, "The speed is %d", speed);
+    POINT_COLOR = BLUE;
+    LCD_ShowString(lcddev.width-24,0,200,8,8,"RST"); //显示清屏区域
+    char time_info[80];
+    sprintf(time_info, "The time is %d",counter);
+    screen_draw_track();
+    draw_obstacles(); // 绘制障碍物
+    POINT_COLOR = RED;
+    // 根据当前场景绘制不同形状的玩家
+    if(current_scene == SCENE_RUNNING || current_scene == SCENE_SWIMMING) {
+        LCD_Draw_Circle(x, y, 20); // 选手
+    }
+    else if(current_scene == SCENE_ROWING) {
+        // 绘制划船的形状，例如一个椭圆
+    	LCD_Draw_Triangle(x - 20, y + 20, x, y - 20, x + 20, y + 20);
+    }
+    else if(current_scene == SCENE_MINING) {
+        // 绘制采矿的形状，例如一个方块
+        LCD_DrawRectangle(x - 20, y - 20, x + 20, y + 20);
+    }
+    LCD_ShowString(lcddev.width-150,30,200,16,16,speed_info); //显示当前速度
+    LCD_ShowString(lcddev.width-150,70,200,16,16,time_info); //显示时间
+    char initial_speed_info[80];
+    sprintf(initial_speed_info, "Initial speed is %d", initial_speed);
+    LCD_ShowString(lcddev.width-150,50,200,16,16,initial_speed_info); //显示初速度
+    //画互动按钮
+    LCD_ShowString(lcddev.width-40, lcddev.height-20, 200, 16, 16, "Jump");
+    LCD_ShowString(lcddev.width-40, lcddev.height-100, 200, 16, 16, "Right");
+    LCD_ShowString(lcddev.width-40, lcddev.height-180, 200, 16, 16, "Left");
 }
 
 void change_state(){
@@ -218,9 +716,141 @@ int max(int a,int b){
 int min(int a, int b){
 	return a < b ? a : b;
 }
-int hit(int x, int y, u16 x_coordinate, u16 y_coordinate){
-	return ((x_coordinate >= (x - 20) && y_coordinate >= (y - 20)) && (x_coordinate <= (x + 40 + 20) && (y_coordinate <= (y + 30 + 20))));
+//int hit(int x, int y, u16 x_coordinate, u16 y_coordinate){
+//	return ((x_coordinate >= (x - 20) && y_coordinate >= (y - 20)) && (x_coordinate <= (x + 40 + 20) && (y_coordinate <= (y + 30 + 20))));
+//}
+/**
+ * @brief 检查玩家与障碍物是否碰撞
+ * @param x 障碍物中心X坐标
+ * @param y 障碍物中心Y坐标
+ * @param x_coordinate 玩家中心X坐标
+ * @param y_coordinate 玩家中心Y坐标
+ * @param shape 玩家形状（0: 圆形, 1: 三角形, 2: 矩形）
+ * @param obstacle_shape 障碍物形状（0: 矩形, 1: 圆形, 2: 三角形）
+ * @return 1表示碰撞，0表示不碰撞
+ */
+int hit(int x, int y, u16 x_coordinate, u16 y_coordinate, ShapeType shape, int obstacle_shape)
+{
+    if(shape == SHAPE_CIRCLE) { // 玩家是圆形
+        if(obstacle_shape == 0) { // 障碍物是矩形
+            // 玩家圆形
+            return circle_rectangle_collision(
+                (float)x_coordinate,
+                (float)y_coordinate,
+                PLAYER_CIRCLE_RADIUS,
+                (float)x,
+                (float)y,
+                OBSTACLE_RECT_WIDTH,
+                OBSTACLE_RECT_HEIGHT
+            );
+        }
+        else if(obstacle_shape == 1) { // 障碍物是圆形
+            // 两个圆形
+            return circle_circle_collision(
+                (float)x_coordinate,
+                (float)y_coordinate,
+                PLAYER_CIRCLE_RADIUS,
+                (float)x,
+                (float)y,
+                OBSTACLE_CIRCLE_RADIUS
+            );
+        }
+        else if(obstacle_shape == 2) { // 障碍物是三角形
+            // 玩家圆形与障碍物三角形
+            return circle_triangle_collision(
+                (float)x_coordinate,
+                (float)y_coordinate,
+                PLAYER_CIRCLE_RADIUS,
+                (float)x,
+                (float)y,
+                OBSTACLE_TRIANGLE_SIZE
+            );
+        }
+    }
+    else if(shape == SHAPE_TRIANGLE) { // 玩家是三角形
+        if(obstacle_shape == 0) { // 障碍物是矩形
+            // 玩家三角形与障碍物矩形
+            return triangle_rectangle_collision(
+                (float)x_coordinate,
+                (float)y_coordinate,
+                PLAYER_TRIANGLE_SIZE,
+                (float)x,
+                (float)y,
+                OBSTACLE_RECT_WIDTH,
+                OBSTACLE_RECT_HEIGHT
+            );
+        }
+        else if(obstacle_shape == 1) { // 障碍物是圆形
+            // 障碍物圆形与玩家三角形
+            return circle_triangle_collision(
+                (float)x,
+                (float)y,
+                OBSTACLE_CIRCLE_RADIUS,
+                (float)x_coordinate,
+                (float)y_coordinate,
+                PLAYER_TRIANGLE_SIZE
+            );
+        }
+        else if(obstacle_shape == 2) { // 障碍物是三角形
+            // 两个三角形
+            return triangle_triangle_collision(
+                (float)x_coordinate,
+                (float)y_coordinate,
+                PLAYER_TRIANGLE_SIZE,
+                (float)x,
+                (float)y,
+                OBSTACLE_TRIANGLE_SIZE
+            );
+        }
+    }
+    else if(shape == SHAPE_RECTANGLE) { // 玩家是矩形
+        if(obstacle_shape == 0) { // 障碍物是矩形
+            // 玩家矩形与障碍物矩形（AABB碰撞）
+            float player_left = (float)x_coordinate - PLAYER_RECT_WIDTH / 2.0f;
+            float player_right = (float)x_coordinate + PLAYER_RECT_WIDTH / 2.0f;
+            float player_top = (float)y_coordinate - PLAYER_RECT_HEIGHT / 2.0f;
+            float player_bottom = (float)y_coordinate + PLAYER_RECT_HEIGHT / 2.0f;
+
+            float obstacle_left = (float)x - OBSTACLE_RECT_WIDTH / 2.0f;
+            float obstacle_right = (float)x + OBSTACLE_RECT_WIDTH / 2.0f;
+            float obstacle_top = (float)y - OBSTACLE_RECT_HEIGHT / 2.0f;
+            float obstacle_bottom = (float)y + OBSTACLE_RECT_HEIGHT / 2.0f;
+
+            if(player_right < obstacle_left || player_left > obstacle_right ||
+               player_bottom < obstacle_top || player_top > obstacle_bottom)
+                return 0;
+            else
+                return 1;
+        }
+        else if(obstacle_shape == 1) { // 障碍物是圆形
+            // 玩家矩形与障碍物圆形
+            return circle_rectangle_collision(
+                (float)x,
+                (float)y,
+                OBSTACLE_CIRCLE_RADIUS,
+                (float)x_coordinate,
+                (float)y_coordinate,
+                PLAYER_RECT_WIDTH,
+                PLAYER_RECT_HEIGHT
+            );
+        }
+        else if(obstacle_shape == 2) { // 障碍物是三角形
+            // 玩家矩形与障碍物三角形
+            return triangle_rectangle_collision(
+                (float)x,
+                (float)y,
+                OBSTACLE_TRIANGLE_SIZE,
+                (float)x_coordinate,
+                (float)y_coordinate,
+                PLAYER_RECT_WIDTH,
+                PLAYER_RECT_HEIGHT
+            );
+        }
+    }
+
+    return 0; // 默认不碰撞
 }
+
 void rtp_test(void)
 {
 	u8 key;
@@ -236,11 +866,28 @@ void rtp_test(void)
 	u8 bit = 0;
 	u8 escape_flag = 0;
 	u8 escape_lock = 0;
+
+	u32 race_start_time = HAL_GetTick();
+	const u32 race_time_limit = 60000; // 比赛时间限制，单位毫秒（60秒）
+
+	    // 初始化随机数
+	init_random();
+	generate_obstacles();
+
+	draw_scene_background();
 	while(1)
 	{
 	 	key=KEY_Scan(0);
 		tp_dev.scan(0);
 		screen_norm_print(x_coordinate,y_coordinate);
+		if(key == KEY1_PRES) { // 按下KEY1切换场景
+		            switch_scene();
+		            // 重置玩家位置和速度
+		            x_coordinate = lcddev.width / 2;
+		            y_coordinate = lcddev.height - 30;
+		            speed = initial_speed;
+		            race_start_time = HAL_GetTick(); // 重置比赛开始时间
+		 }
 		if(tp_dev.sta&TP_PRES_DOWN)			//触摸屏被按下
 		{
 			escape_lock = 1;
@@ -248,30 +895,21 @@ void rtp_test(void)
 			if (tp_dev.x[0] > lcddev.width - 45 && tp_dev.y[0] > lcddev.height - 25){
 				//跳跃
 				LED1 = !LED1;
-				//改变颜色
-				LCD_Clear_Circle(x_coordinate,y_coordinate,20,WHITE);
-				LCD_Clear_Circle(x_coordinate,y_coordinate,20,BLUE);
-				HAL_Delay(1000);
-				LCD_Clear_Circle(x_coordinate,y_coordinate,20,WHITE);
-				if(y_coordinate - 30 > 20){
-					y_coordinate -= 92;
-					if ((y_coordinate + 92 <= y1 + 70 && y_coordinate + 92 > y1 + 50 && x_coordinate >= x1 - 20 && x_coordinate <= x1 + 60 )|| (y_coordinate + 92 <= y2 + 55 && y_coordinate + 92 > y2 + 50 && x_coordinate >= x1 -20 && x_coordinate <= x1 + 60)){
-						//过晚跳跃会撞到障碍物
-						y_coordinate += 92;
-						speed = 0;
-						LCD_Clear(WHITE);
-						POINT_COLOR = RED;
-						LCD_ShowString(lcddev.width/2,lcddev.height/2,300,24,24,"HIT!");
-						HAL_Delay(1000);
-						LCD_Clear(WHITE);
+				if(player_state == PLAYER_STATE_IDLE){
+					player_state = PLAYER_STATE_JUMPING;
+					u16 temp = handle_jump(x_coordinate, y_coordinate, shape, current_scene);
+					if(temp != -1){
+						y_coordinate = temp;
 					}
+					player_state = PLAYER_STATE_IDLE;
 				}
 			}
 			else if(tp_dev.x[0] > lcddev.width - 45 && tp_dev.y[0] > lcddev.height - 105 && tp_dev.y[0] <= lcddev.height - 25){
 				//向右移动
 				LED1 = !LED1;
 				if(x_coordinate + 10 < lcddev.width - 20){
-					LCD_Clear_Circle(x_coordinate,y_coordinate,20,WHITE);
+//					LCD_Clear_Circle(x_coordinate,y_coordinate,20,WHITE);
+					LCD_Clear_Shape(x_coordinate,y_coordinate,background_color,shape);
 					x_coordinate += 10;
 				}
 				else{
@@ -279,14 +917,15 @@ void rtp_test(void)
 					speed = 0;
 					LCD_ShowString(lcddev.width/2,lcddev.height/2,300,24,24,"TURN!");
 					HAL_Delay(1000);
-					LCD_Clear(WHITE);
+					LCD_Clear(background_color);
 				}
 			}
 			else if(tp_dev.x[0] > lcddev.width - 45 && tp_dev.y[0] > lcddev.height - 185 && tp_dev.y[0] <= lcddev.height - 105){
 				//向左移动
 				LED1 = !LED1;
 				if(x_coordinate - 10 > 20){
-					LCD_Clear_Circle(x_coordinate,y_coordinate,20,WHITE);
+//					LCD_Clear_Circle(x_coordinate,y_coordinate,20,WHITE);
+					LCD_Clear_Shape(x_coordinate,y_coordinate,background_color,shape);
 					x_coordinate -= 10;
 				}
 				else{
@@ -294,7 +933,7 @@ void rtp_test(void)
 					speed = 0;
 					LCD_ShowString(lcddev.width/2,lcddev.height/2,300,24,24,"TURN!");
 					HAL_Delay(1000);
-					LCD_Clear(WHITE);
+					LCD_Clear(background_color);
 				}
 			}
 			else if (tp_dev.x[0] <= lcddev.width - 45){
@@ -336,8 +975,9 @@ void rtp_test(void)
 			}
 			last_x = 0;
 			last_y = 0;
-			if (y_coordinate - speed > 30 && y_coordinate - speed < lcddev.height -30){
-						LCD_Clear_Circle(x_coordinate,y_coordinate,20,WHITE);
+			if (y_coordinate - speed < lcddev.height -30){
+//						LCD_Clear_Circle(x_coordinate,y_coordinate,20,WHITE);
+				LCD_Clear_Shape(x_coordinate,y_coordinate,background_color,shape);
 						y_coordinate -= speed;
 					}//移动
 				 		//没有滑动时，慢慢减�??
@@ -351,18 +991,35 @@ void rtp_test(void)
 				 		}
 
 			}
-		//判断是否撞到障碍物
-		if ((hit(x1,y1,x_coordinate,y_coordinate) || hit(x2,y2,x_coordinate,y_coordinate)) && !escape_flag){
-			speed = 0;
-			escape_flag = 1; //等待触摸后将escape_flag重新置为0
-			escape_lock = 0;
-			LCD_Clear(WHITE);
-			POINT_COLOR = RED;
-			LCD_ShowString(lcddev.width/2,lcddev.height/2,300,24,24,"HIT!");
-			HAL_Delay(1000);
-			LCD_Clear(WHITE);
 
+		for(int i = 0; i < MAX_OBSTACLES; i++) {
+		            if(hit(obstacles[i].x, obstacles[i].y, x_coordinate, y_coordinate,shape,obstacles[i].type) && !escape_flag){
+		                speed = 0;
+		                escape_flag = 1; //等待触摸后将escape_flag重新置为0
+		                escape_lock = 0;
+		                LCD_Clear(background_color);
+		                POINT_COLOR = RED;
+		                LCD_ShowString(lcddev.width / 2, lcddev.height / 2, 300, 24, 24, "HIT!");
+		                HAL_Delay(1000);
+		                LCD_Clear(background_color);
+		            }
+		        }
+		//完赛提示
+		if (y_coordinate <= 20){
+			u32 race_finish_time = HAL_GetTick();
+			speed = 0;
+			LCD_Clear(background_color);
+			POINT_COLOR = RED;
+			if (counter >= 30){
+				LCD_ShowString(lcddev.width/2 - 100,lcddev.height/2,300,16,16,"Race is Finished out of time!");
+			}
+			else{
+			LCD_ShowString(lcddev.width/2 - 100,lcddev.height/2,300,16,16,"Race is Finished in time!");
+			}
+			HAL_Delay(1000);
+			LCD_Clear(background_color);
 		}
+
 		if(key==KEY0_PRES)	//KEY0按下,则执行校准程�???
 		{
 			LCD_Clear(WHITE);	//清屏
@@ -371,7 +1028,7 @@ void rtp_test(void)
 			Load_Drow_Dialog();
 		}
 		i++;
-		if(i%20==0)LED0=!LED0;
+		if(i%15==0){LED0=!LED0; counter ++;};
 	}
 }
 //电容触摸屏测试函�???
@@ -479,6 +1136,7 @@ int main(void)
   MX_USART1_UART_Init();
   MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
+  init_random();
   HAL_TIM_Base_Start_IT(&htim2);
   POINT_COLOR=RED;
 //  	LCD_ShowString(30,50,200,16,16,"Mini STM32");

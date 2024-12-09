@@ -2555,6 +2555,97 @@ void LCD_Clear_Rectangle(u16 x1, u16 y1, u16 width, u16 height, u16 color)
     }
 }
 
+void LCD_Draw_Triangle(u16 x0, u16 y0, u16 x1, u16 y1, u16 x2, u16 y2)
+{
+    // 绘制三角形的三条边
+    LCD_DrawLine(x0, y0, x1, y1);
+    LCD_DrawLine(x1, y1, x2, y2);
+    LCD_DrawLine(x2, y2, x0, y0);
+}
+
+//void LCD_Clear_Shape(u16 x0, u16 y0, u16 color, u8 shape){
+//	POINT_COLOR = color;
+//	if(shape == 0){
+//		LCD_Clear_Circle(x0,y0,20,color);
+//	}
+//	else if(shape == 1){
+//		LCD_Draw_Triangle(x0-20,y0+20,x0, y0-20,x0+20,y0+20);
+//	}
+//	else if(shape == 2){
+//		LCD_DrawRectangle(x0-20,y0-20,x0+20,y0+20);
+//	}
+//}
+
+void LCD_Draw_Ellipse(uint16_t x0, uint16_t y0, uint16_t rx, uint16_t ry)
+{
+    int x = 0;
+    int y = ry;
+
+    long rx_sq = (long)rx * rx;
+    long ry_sq = (long)ry * ry;
+    long two_rx_sq = 2 * rx_sq;
+    long two_ry_sq = 2 * ry_sq;
+
+    // 决策参数初始值
+    long px = 0;
+    long py = two_rx_sq * y;
+
+    // 阶段1：斜率绝对值大于1
+    long p1 = ry_sq - (rx_sq * ry) + (rx_sq / 4);
+    while (px < py)
+    {
+        // 绘制四个对称点
+        LCD_DrawPoint(x0 + x, y0 + y);
+        LCD_DrawPoint(x0 - x, y0 + y);
+        LCD_DrawPoint(x0 + x, y0 - y);
+        LCD_DrawPoint(x0 - x, y0 - y);
+
+        x++;
+
+        px += two_ry_sq;
+        if (p1 < 0)
+        {
+            p1 += ry_sq + px;
+        }
+        else
+        {
+            y--;
+            py -= two_rx_sq;
+            p1 += ry_sq + px - py;
+        }
+    }
+
+    // 阶段2：斜率绝对值小于等于1
+    long p2 = ry_sq * (x + 0.5) * (x + 0.5) + rx_sq * (y - 1) * (y - 1) - rx_sq * ry_sq;
+    // 使用整数运算近似
+    p2 = (long)(ry_sq * (x + 1) * (x + 1)) + (long)(rx_sq * (y - 1) * (y - 1)) - (long)(rx_sq * ry_sq);
+
+    while (y >= 0)
+    {
+        // 绘制四个对称点
+        LCD_DrawPoint(x0 + x, y0 + y);
+        LCD_DrawPoint(x0 - x, y0 + y);
+        LCD_DrawPoint(x0 + x, y0 - y);
+        LCD_DrawPoint(x0 - x, y0 - y);
+
+        y--;
+
+        py -= two_rx_sq;
+        if (p2 > 0)
+        {
+            p2 += rx_sq - py;
+        }
+        else
+        {
+            x++;
+            px += two_ry_sq;
+            p2 += rx_sq - py + px;
+        }
+    }
+}
+
+
+
 
 
 

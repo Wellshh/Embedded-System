@@ -36,3 +36,5 @@
 ../Core/Src/lcd.c:2475:6:LCD_ShowPicture	3
 ../Core/Src/lcd.c:2489:6:LCD_Clear_Circle	3
 ../Core/Src/lcd.c:2524:6:LCD_Clear_Rectangle	5
+../Core/Src/lcd.c:2558:6:LCD_Draw_Triangle	1
+../Core/Src/lcd.c:2579:6:LCD_Draw_Ellipse	6

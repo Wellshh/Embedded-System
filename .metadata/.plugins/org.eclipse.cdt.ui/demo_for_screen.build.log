@@ -1,46 +1,52 @@
-22:48:39 **** Incremental Build of configuration Debug for project demo_for_screen ****
+16:36:26 **** Incremental Build of configuration Debug for project demo_for_screen ****
 make -j20 all 
 arm-none-eabi-gcc "../Core/Src/main.c" -mcpu=cortex-m3 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F103xE -c -I../Core/Inc -I../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I../Drivers/STM32F1xx_HAL_Driver/Inc -I../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/main.d" -MT"Core/Src/main.o" --specs=nano.specs -mfloat-abi=soft -mthumb -o "Core/Src/main.o"
-../Core/Src/main.c:53:11: warning: built-in function 'y1' declared as non-function [-Wbuiltin-declaration-mismatch]
-   53 | int x1,x2,y1,y2; //障碍物坐�?
-      |           ^~
-../Core/Src/main.c: In function 'Load_Drow_Dialog':
-../Core/Src/main.c:64:52: warning: pointer targets in passing argument 6 of 'LCD_ShowString' differ in signedness [-Wpointer-sign]
-   64 |         LCD_ShowString(lcddev.width-24,0,200,16,16,"RST");//显示清屏区域
-      |                                                    ^~~~~
-      |                                                    |
-      |                                                    char *
+../Core/Src/main.c: In function 'handle_jump':
+../Core/Src/main.c:207:88: warning: pointer targets in passing argument 6 of 'LCD_ShowString' differ in signedness [-Wpointer-sign]
+  207 |                 LCD_ShowString(lcddev.width / 2 - 150, lcddev.height / 2, 300, 24, 24, "You are dead!");
+      |                                                                                        ^~~~~~~~~~~~~~~
+      |                                                                                        |
+      |                                                                                        char *
 In file included from ../Core/Src/main.c:32:
 ../Core/Inc/lcd.h:134:71: note: expected 'u8 *' {aka 'unsigned char *'} but argument is of type 'char *'
   134 | void LCD_ShowString(u16 x, u16 y, u16 width, u16 height, u8 size, u8 *p);   //��ʾһ���ַ���,12/16����
       |                                                                   ~~~~^
-../Core/Src/main.c: In function 'screen_print':
-../Core/Src/main.c:121:52: warning: pointer targets in passing argument 6 of 'LCD_ShowString' differ in signedness [-Wpointer-sign]
-  121 |         LCD_ShowString(lcddev.width-24,0,200,16,16,"RST");//显示清屏区域
+../Core/Src/main.c: In function 'Load_Drow_Dialog':
+../Core/Src/main.c:542:52: warning: pointer targets in passing argument 6 of 'LCD_ShowString' differ in signedness [-Wpointer-sign]
+  542 |         LCD_ShowString(lcddev.width-24,0,200,16,16,"RST");//显示清屏区域
       |                                                    ^~~~~
       |                                                    |
       |                                                    char *
 ../Core/Inc/lcd.h:134:71: note: expected 'u8 *' {aka 'unsigned char *'} but argument is of type 'char *'
   134 | void LCD_ShowString(u16 x, u16 y, u16 width, u16 height, u8 size, u8 *p);   //��ʾһ���ַ���,12/16����
       |                                                                   ~~~~^
-../Core/Src/main.c:122:39: warning: pointer targets in passing argument 6 of 'LCD_ShowString' differ in signedness [-Wpointer-sign]
-  122 |         LCD_ShowString(0,0,200,24,24, "SHOW PICTURE");
+../Core/Src/main.c: In function 'screen_print':
+../Core/Src/main.c:599:52: warning: pointer targets in passing argument 6 of 'LCD_ShowString' differ in signedness [-Wpointer-sign]
+  599 |         LCD_ShowString(lcddev.width-24,0,200,16,16,"RST");//显示清屏区域
+      |                                                    ^~~~~
+      |                                                    |
+      |                                                    char *
+../Core/Inc/lcd.h:134:71: note: expected 'u8 *' {aka 'unsigned char *'} but argument is of type 'char *'
+  134 | void LCD_ShowString(u16 x, u16 y, u16 width, u16 height, u8 size, u8 *p);   //��ʾһ���ַ���,12/16����
+      |                                                                   ~~~~^
+../Core/Src/main.c:600:39: warning: pointer targets in passing argument 6 of 'LCD_ShowString' differ in signedness [-Wpointer-sign]
+  600 |         LCD_ShowString(0,0,200,24,24, "SHOW PICTURE");
       |                                       ^~~~~~~~~~~~~~
       |                                       |
       |                                       char *
 ../Core/Inc/lcd.h:134:71: note: expected 'u8 *' {aka 'unsigned char *'} but argument is of type 'char *'
   134 | void LCD_ShowString(u16 x, u16 y, u16 width, u16 height, u8 size, u8 *p);   //��ʾһ���ַ���,12/16����
       |                                                                   ~~~~^
-../Core/Src/main.c:123:41: warning: pointer targets in passing argument 6 of 'LCD_ShowString' differ in signedness [-Wpointer-sign]
-  123 |         LCD_ShowString(60,60,200,24,24, "SEND MESSAGE");
+../Core/Src/main.c:601:41: warning: pointer targets in passing argument 6 of 'LCD_ShowString' differ in signedness [-Wpointer-sign]
+  601 |         LCD_ShowString(60,60,200,24,24, "SEND MESSAGE");
       |                                         ^~~~~~~~~~~~~~
       |                                         |
       |                                         char *
 ../Core/Inc/lcd.h:134:71: note: expected 'u8 *' {aka 'unsigned char *'} but argument is of type 'char *'
   134 | void LCD_ShowString(u16 x, u16 y, u16 width, u16 height, u8 size, u8 *p);   //��ʾһ���ַ���,12/16����
       |                                                                   ~~~~^
-../Core/Src/main.c:125:40: warning: pointer targets in passing argument 6 of 'LCD_ShowString' differ in signedness [-Wpointer-sign]
-  125 |         LCD_ShowString(0,110,200,24,24,"POKEMON GO");
+../Core/Src/main.c:603:40: warning: pointer targets in passing argument 6 of 'LCD_ShowString' differ in signedness [-Wpointer-sign]
+  603 |         LCD_ShowString(0,110,200,24,24,"POKEMON GO");
       |                                        ^~~~~~~~~~~~
       |                                        |
       |                                        char *
@@ -48,122 +54,147 @@ In file included from ../Core/Src/main.c:32:
   134 | void LCD_ShowString(u16 x, u16 y, u16 width, u16 height, u8 size, u8 *p);   //��ʾһ���ַ���,12/16����
       |                                                                   ~~~~^
 ../Core/Src/main.c: In function 'screen_norm_print':
-../Core/Src/main.c:144:9: warning: implicit declaration of function 'sprintf' [-Wimplicit-function-declaration]
-  144 |         sprintf(speed_info, "The speed is %d",speed);
-      |         ^~~~~~~
-../Core/Src/main.c:37:1: note: include '<stdio.h>' or provide a declaration of 'sprintf'
-   36 | #include "24l01.h" //通信驱动 基于spi进行通信
+../Core/Src/main.c:634:5: warning: implicit declaration of function 'sprintf' [-Wimplicit-function-declaration]
+  634 |     sprintf(speed_info, "The speed is %d", speed);
+      |     ^~~~~~~
+../Core/Src/main.c:40:1: note: include '<stdio.h>' or provide a declaration of 'sprintf'
+   39 | #include <math.h>
   +++ |+#include <stdio.h>
-   37 | //#include "remote.h" 红外遥控驱动
-../Core/Src/main.c:144:9: warning: incompatible implicit declaration of built-in function 'sprintf' [-Wbuiltin-declaration-mismatch]
-  144 |         sprintf(speed_info, "The speed is %d",speed);
-      |         ^~~~~~~
-../Core/Src/main.c:144:9: note: include '<stdio.h>' or provide a declaration of 'sprintf'
-../Core/Src/main.c:146:50: warning: pointer targets in passing argument 6 of 'LCD_ShowString' differ in signedness [-Wpointer-sign]
-  146 |         LCD_ShowString(lcddev.width-24,0,200,8,8,"RST");//显示清屏区域
-      |                                                  ^~~~~
+   40 | #include <stdint.h>
+../Core/Src/main.c:634:5: warning: incompatible implicit declaration of built-in function 'sprintf' [-Wbuiltin-declaration-mismatch]
+  634 |     sprintf(speed_info, "The speed is %d", speed);
+      |     ^~~~~~~
+../Core/Src/main.c:634:5: note: include '<stdio.h>' or provide a declaration of 'sprintf'
+../Core/Src/main.c:636:46: warning: pointer targets in passing argument 6 of 'LCD_ShowString' differ in signedness [-Wpointer-sign]
+  636 |     LCD_ShowString(lcddev.width-24,0,200,8,8,"RST"); //显示清屏区域
+      |                                              ^~~~~
+      |                                              |
+      |                                              char *
+../Core/Inc/lcd.h:134:71: note: expected 'u8 *' {aka 'unsigned char *'} but argument is of type 'char *'
+  134 | void LCD_ShowString(u16 x, u16 y, u16 width, u16 height, u8 size, u8 *p);   //��ʾһ���ַ���,12/16����
+      |                                                                   ~~~~^
+../Core/Src/main.c:654:50: warning: pointer targets in passing argument 6 of 'LCD_ShowString' differ in signedness [-Wpointer-sign]
+  654 |     LCD_ShowString(lcddev.width-150,30,200,16,16,speed_info); //显示当前速度
+      |                                                  ^~~~~~~~~~
       |                                                  |
       |                                                  char *
 ../Core/Inc/lcd.h:134:71: note: expected 'u8 *' {aka 'unsigned char *'} but argument is of type 'char *'
   134 | void LCD_ShowString(u16 x, u16 y, u16 width, u16 height, u8 size, u8 *p);   //��ʾһ���ַ���,12/16����
       |                                                                   ~~~~^
-../Core/Src/main.c:150:54: warning: pointer targets in passing argument 6 of 'LCD_ShowString' differ in signedness [-Wpointer-sign]
-  150 |         LCD_ShowString(lcddev.width-150,30,200,16,16,speed_info);//显示当前速度
-      |                                                      ^~~~~~~~~~
-      |                                                      |
-      |                                                      char *
+../Core/Src/main.c:655:50: warning: pointer targets in passing argument 6 of 'LCD_ShowString' differ in signedness [-Wpointer-sign]
+  655 |     LCD_ShowString(lcddev.width-150,70,200,16,16,time_info); //显示时间
+      |                                                  ^~~~~~~~~
+      |                                                  |
+      |                                                  char *
 ../Core/Inc/lcd.h:134:71: note: expected 'u8 *' {aka 'unsigned char *'} but argument is of type 'char *'
   134 | void LCD_ShowString(u16 x, u16 y, u16 width, u16 height, u8 size, u8 *p);   //��ʾһ���ַ���,12/16����
       |                                                                   ~~~~^
-../Core/Src/main.c:153:54: warning: pointer targets in passing argument 6 of 'LCD_ShowString' differ in signedness [-Wpointer-sign]
-  153 |         LCD_ShowString(lcddev.width-150,50,200,16,16,initial_speed_info); //显示初�?�度
-      |                                                      ^~~~~~~~~~~~~~~~~~
-      |                                                      |
-      |                                                      char *
+../Core/Src/main.c:658:50: warning: pointer targets in passing argument 6 of 'LCD_ShowString' differ in signedness [-Wpointer-sign]
+  658 |     LCD_ShowString(lcddev.width-150,50,200,16,16,initial_speed_info); //显示初�?�度
+      |                                                  ^~~~~~~~~~~~~~~~~~
+      |                                                  |
+      |                                                  char *
 ../Core/Inc/lcd.h:134:71: note: expected 'u8 *' {aka 'unsigned char *'} but argument is of type 'char *'
   134 | void LCD_ShowString(u16 x, u16 y, u16 width, u16 height, u8 size, u8 *p);   //��ʾһ���ַ���,12/16����
       |                                                                   ~~~~^
-../Core/Src/main.c:155:67: warning: pointer targets in passing argument 6 of 'LCD_ShowString' differ in signedness [-Wpointer-sign]
-  155 |         LCD_ShowString(lcddev.width-40,lcddev.height-20,200,16,16,"Jump");
-      |                                                                   ^~~~~~
-      |                                                                   |
-      |                                                                   char *
-../Core/Inc/lcd.h:134:71: note: expected 'u8 *' {aka 'unsigned char *'} but argument is of type 'char *'
-  134 | void LCD_ShowString(u16 x, u16 y, u16 width, u16 height, u8 size, u8 *p);   //��ʾһ���ַ���,12/16����
-      |                                                                   ~~~~^
-../Core/Src/main.c:156:68: warning: pointer targets in passing argument 6 of 'LCD_ShowString' differ in signedness [-Wpointer-sign]
-  156 |         LCD_ShowString(lcddev.width-40,lcddev.height-100,200,16,16,"Right");
-      |                                                                    ^~~~~~~
-      |                                                                    |
-      |                                                                    char *
-../Core/Inc/lcd.h:134:71: note: expected 'u8 *' {aka 'unsigned char *'} but argument is of type 'char *'
-  134 | void LCD_ShowString(u16 x, u16 y, u16 width, u16 height, u8 size, u8 *p);   //��ʾһ���ַ���,12/16����
-      |                                                                   ~~~~^
-../Core/Src/main.c:157:68: warning: pointer targets in passing argument 6 of 'LCD_ShowString' differ in signedness [-Wpointer-sign]
-  157 |         LCD_ShowString(lcddev.width-40,lcddev.height-180,200,16,16,"Left");
+../Core/Src/main.c:660:68: warning: pointer targets in passing argument 6 of 'LCD_ShowString' differ in signedness [-Wpointer-sign]
+  660 |     LCD_ShowString(lcddev.width-40, lcddev.height-20, 200, 16, 16, "Jump");
       |                                                                    ^~~~~~
       |                                                                    |
       |                                                                    char *
 ../Core/Inc/lcd.h:134:71: note: expected 'u8 *' {aka 'unsigned char *'} but argument is of type 'char *'
   134 | void LCD_ShowString(u16 x, u16 y, u16 width, u16 height, u8 size, u8 *p);   //��ʾһ���ַ���,12/16����
       |                                                                   ~~~~^
+../Core/Src/main.c:661:69: warning: pointer targets in passing argument 6 of 'LCD_ShowString' differ in signedness [-Wpointer-sign]
+  661 |     LCD_ShowString(lcddev.width-40, lcddev.height-100, 200, 16, 16, "Right");
+      |                                                                     ^~~~~~~
+      |                                                                     |
+      |                                                                     char *
+../Core/Inc/lcd.h:134:71: note: expected 'u8 *' {aka 'unsigned char *'} but argument is of type 'char *'
+  134 | void LCD_ShowString(u16 x, u16 y, u16 width, u16 height, u8 size, u8 *p);   //��ʾһ���ַ���,12/16����
+      |                                                                   ~~~~^
+../Core/Src/main.c:662:69: warning: pointer targets in passing argument 6 of 'LCD_ShowString' differ in signedness [-Wpointer-sign]
+  662 |     LCD_ShowString(lcddev.width-40, lcddev.height-180, 200, 16, 16, "Left");
+      |                                                                     ^~~~~~
+      |                                                                     |
+      |                                                                     char *
+../Core/Inc/lcd.h:134:71: note: expected 'u8 *' {aka 'unsigned char *'} but argument is of type 'char *'
+  134 | void LCD_ShowString(u16 x, u16 y, u16 width, u16 height, u8 size, u8 *p);   //��ʾһ���ַ���,12/16����
+      |                                                                   ~~~~^
 ../Core/Src/main.c: In function 'change_state':
-../Core/Src/main.c:170:17: warning: incompatible implicit declaration of built-in function 'sprintf' [-Wbuiltin-declaration-mismatch]
-  170 |                 sprintf(STATE, "STATE: ON");
+../Core/Src/main.c:668:17: warning: incompatible implicit declaration of built-in function 'sprintf' [-Wbuiltin-declaration-mismatch]
+  668 |                 sprintf(STATE, "STATE: ON");
       |                 ^~~~~~~
-../Core/Src/main.c:170:17: note: include '<stdio.h>' or provide a declaration of 'sprintf'
-../Core/Src/main.c:170:25: warning: pointer targets in passing argument 1 of 'sprintf' differ in signedness [-Wpointer-sign]
-  170 |                 sprintf(STATE, "STATE: ON");
+../Core/Src/main.c:668:17: note: include '<stdio.h>' or provide a declaration of 'sprintf'
+../Core/Src/main.c:668:25: warning: pointer targets in passing argument 1 of 'sprintf' differ in signedness [-Wpointer-sign]
+  668 |                 sprintf(STATE, "STATE: ON");
       |                         ^~~~~
       |                         |
       |                         u8 * {aka unsigned char *}
-../Core/Src/main.c:170:25: note: expected 'char *' but argument is of type 'u8 *' {aka 'unsigned char *'}
-../Core/Src/main.c:173:17: warning: incompatible implicit declaration of built-in function 'sprintf' [-Wbuiltin-declaration-mismatch]
-  173 |                 sprintf(STATE, "STATE: OFF");
+../Core/Src/main.c:668:25: note: expected 'char *' but argument is of type 'u8 *' {aka 'unsigned char *'}
+../Core/Src/main.c:671:17: warning: incompatible implicit declaration of built-in function 'sprintf' [-Wbuiltin-declaration-mismatch]
+  671 |                 sprintf(STATE, "STATE: OFF");
       |                 ^~~~~~~
-../Core/Src/main.c:173:17: note: include '<stdio.h>' or provide a declaration of 'sprintf'
-../Core/Src/main.c:173:25: warning: pointer targets in passing argument 1 of 'sprintf' differ in signedness [-Wpointer-sign]
-  173 |                 sprintf(STATE, "STATE: OFF");
+../Core/Src/main.c:671:17: note: include '<stdio.h>' or provide a declaration of 'sprintf'
+../Core/Src/main.c:671:25: warning: pointer targets in passing argument 1 of 'sprintf' differ in signedness [-Wpointer-sign]
+  671 |                 sprintf(STATE, "STATE: OFF");
       |                         ^~~~~
       |                         |
       |                         u8 * {aka unsigned char *}
-../Core/Src/main.c:173:25: note: expected 'char *' but argument is of type 'u8 *' {aka 'unsigned char *'}
+../Core/Src/main.c:671:25: note: expected 'char *' but argument is of type 'u8 *' {aka 'unsigned char *'}
 ../Core/Src/main.c: In function 'rtp_test':
-../Core/Src/main.c:264:105: warning: pointer targets in passing argument 6 of 'LCD_ShowString' differ in signedness [-Wpointer-sign]
-  264 |                                                 LCD_ShowString(lcddev.width/2,lcddev.height/2,300,24,24,"HIT!");
-      |                                                                                                         ^~~~~~
-      |                                                                                                         |
-      |                                                                                                         char *
-../Core/Inc/lcd.h:134:71: note: expected 'u8 *' {aka 'unsigned char *'} but argument is of type 'char *'
-  134 | void LCD_ShowString(u16 x, u16 y, u16 width, u16 height, u8 size, u8 *p);   //��ʾһ���ַ���,12/16����
-      |                                                                   ~~~~^
-../Core/Src/main.c:280:97: warning: pointer targets in passing argument 6 of 'LCD_ShowString' differ in signedness [-Wpointer-sign]
-  280 |                                         LCD_ShowString(lcddev.width/2,lcddev.height/2,300,24,24,"TURN!");
+../Core/Src/main.c:918:97: warning: pointer targets in passing argument 6 of 'LCD_ShowString' differ in signedness [-Wpointer-sign]
+  918 |                                         LCD_ShowString(lcddev.width/2,lcddev.height/2,300,24,24,"TURN!");
       |                                                                                                 ^~~~~~~
       |                                                                                                 |
       |                                                                                                 char *
 ../Core/Inc/lcd.h:134:71: note: expected 'u8 *' {aka 'unsigned char *'} but argument is of type 'char *'
   134 | void LCD_ShowString(u16 x, u16 y, u16 width, u16 height, u8 size, u8 *p);   //��ʾһ���ַ���,12/16����
       |                                                                   ~~~~^
-../Core/Src/main.c:295:97: warning: pointer targets in passing argument 6 of 'LCD_ShowString' differ in signedness [-Wpointer-sign]
-  295 |                                         LCD_ShowString(lcddev.width/2,lcddev.height/2,300,24,24,"TURN!");
+../Core/Src/main.c:934:97: warning: pointer targets in passing argument 6 of 'LCD_ShowString' differ in signedness [-Wpointer-sign]
+  934 |                                         LCD_ShowString(lcddev.width/2,lcddev.height/2,300,24,24,"TURN!");
       |                                                                                                 ^~~~~~~
       |                                                                                                 |
       |                                                                                                 char *
 ../Core/Inc/lcd.h:134:71: note: expected 'u8 *' {aka 'unsigned char *'} but argument is of type 'char *'
   134 | void LCD_ShowString(u16 x, u16 y, u16 width, u16 height, u8 size, u8 *p);   //��ʾһ���ַ���,12/16����
       |                                                                   ~~~~^
-../Core/Src/main.c:361:81: warning: pointer targets in passing argument 6 of 'LCD_ShowString' differ in signedness [-Wpointer-sign]
-  361 |                         LCD_ShowString(lcddev.width/2,lcddev.height/2,300,24,24,"HIT!");
-      |                                                                                 ^~~~~~
-      |                                                                                 |
-      |                                                                                 char *
+../Core/Src/main.c:1002:98: warning: pointer targets in passing argument 6 of 'LCD_ShowString' differ in signedness [-Wpointer-sign]
+ 1002 |                                 LCD_ShowString(lcddev.width / 2, lcddev.height / 2, 300, 24, 24, "HIT!");
+      |                                                                                                  ^~~~~~
+      |                                                                                                  |
+      |                                                                                                  char *
 ../Core/Inc/lcd.h:134:71: note: expected 'u8 *' {aka 'unsigned char *'} but argument is of type 'char *'
   134 | void LCD_ShowString(u16 x, u16 y, u16 width, u16 height, u8 size, u8 *p);   //��ʾһ���ַ���,12/16����
       |                                                                   ~~~~^
+../Core/Src/main.c:1014:95: warning: pointer targets in passing argument 6 of 'LCD_ShowString' differ in signedness [-Wpointer-sign]
+ 1014 |                                 LCD_ShowString(lcddev.width/2 - 100,lcddev.height/2,300,16,16,"Race is Finished out of time!");
+      |                                                                                               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      |                                                                                               |
+      |                                                                                               char *
+../Core/Inc/lcd.h:134:71: note: expected 'u8 *' {aka 'unsigned char *'} but argument is of type 'char *'
+  134 | void LCD_ShowString(u16 x, u16 y, u16 width, u16 height, u8 size, u8 *p);   //��ʾһ���ַ���,12/16����
+      |                                                                   ~~~~^
+../Core/Src/main.c:1017:87: warning: pointer targets in passing argument 6 of 'LCD_ShowString' differ in signedness [-Wpointer-sign]
+ 1017 |                         LCD_ShowString(lcddev.width/2 - 100,lcddev.height/2,300,16,16,"Race is Finished in time!");
+      |                                                                                       ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+      |                                                                                       |
+      |                                                                                       char *
+../Core/Inc/lcd.h:134:71: note: expected 'u8 *' {aka 'unsigned char *'} but argument is of type 'char *'
+  134 | void LCD_ShowString(u16 x, u16 y, u16 width, u16 height, u8 size, u8 *p);   //��ʾһ���ַ���,12/16����
+      |                                                                   ~~~~^
+../Core/Src/main.c:1009:29: warning: unused variable 'race_finish_time' [-Wunused-variable]
+ 1009 |                         u32 race_finish_time = HAL_GetTick();
+      |                             ^~~~~~~~~~~~~~~~
+../Core/Src/main.c:871:19: warning: unused variable 'race_time_limit' [-Wunused-variable]
+  871 |         const u32 race_time_limit = 60000; // 比赛时间限制，单位毫秒（60秒）
+      |                   ^~~~~~~~~~~~~~~
+../Core/Src/main.c:870:13: warning: variable 'race_start_time' set but not used [-Wunused-but-set-variable]
+  870 |         u32 race_start_time = HAL_GetTick();
+      |             ^~~~~~~~~~~~~~~
 ../Core/Src/main.c: In function 'main':
-../Core/Src/main.c:490:49: warning: pointer targets in passing argument 6 of 'LCD_ShowString' differ in signedness [-Wpointer-sign]
-  490 |                 LCD_ShowString(30,130,200,16,16,"Press KEY0 to Adjust");//电阻屏才显示
+../Core/Src/main.c:1148:49: warning: pointer targets in passing argument 6 of 'LCD_ShowString' differ in signedness [-Wpointer-sign]
+ 1148 |                 LCD_ShowString(30,130,200,16,16,"Press KEY0 to Adjust");//电阻屏才显示
       |                                                 ^~~~~~~~~~~~~~~~~~~~~~
       |                                                 |
       |                                                 char *
@@ -177,7 +208,7 @@ Finished building target: demo_for_screen.elf
 arm-none-eabi-size  demo_for_screen.elf 
 arm-none-eabi-objdump -h -S demo_for_screen.elf  > "demo_for_screen.list"
    text	   data	    bss	    dec	    hex	filename
-  57960	    192	   2184	  60336	   ebb0	demo_for_screen.elf
+  64884	    208	   2200	  67292	  106dc	demo_for_screen.elf
 arm-none-eabi-objcopy  -O ihex demo_for_screen.elf  "demo_for_screen.hex"
 Finished building: default.size.stdout
 arm-none-eabi-objcopy  -O binary demo_for_screen.elf  "demo_for_screen.bin"
@@ -189,5 +220,5 @@ Finished building: demo_for_screen.list
  
  
 
-22:48:40 Build Finished. 0 errors, 24 warnings. (took 1s.482ms)
+16:36:28 Build Finished. 0 errors, 29 warnings. (took 1s.435ms)
 

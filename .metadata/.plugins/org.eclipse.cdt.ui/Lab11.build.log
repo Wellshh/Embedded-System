@@ -1,0 +1,27 @@
+11:32:48 **** Incremental Build of configuration Debug for project Lab11 ****
+make -j20 all 
+arm-none-eabi-gcc "../Core/Src/main.c" -mcpu=cortex-m3 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F103xE -c -I../Core/Inc -I../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I../Drivers/STM32F1xx_HAL_Driver/Inc -I../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/main.d" -MT"Core/Src/main.o" --specs=nano.specs -mfloat-abi=soft -mthumb -o "Core/Src/main.o"
+../Core/Src/main.c: In function 'main':
+../Core/Src/main.c:76:18: warning: unused variable 'raw' [-Wunused-variable]
+   76 |         uint16_t raw;
+      |                  ^~~
+arm-none-eabi-gcc -o "Lab11.elf" @"objects.list"   -mcpu=cortex-m3 -T"D:\STM32\Lab11\STM32F103RCTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Lab11.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -u _printf_float -Wl,--start-group -lc -lm -Wl,--end-group
+Finished building target: Lab11.elf
+ 
+arm-none-eabi-size  Lab11.elf 
+arm-none-eabi-objdump -h -S Lab11.elf  > "Lab11.list"
+   text	   data	    bss	    dec	    hex	filename
+  62808	    472	   2040	  65320	   ff28	Lab11.elf
+arm-none-eabi-objcopy  -O ihex Lab11.elf  "Lab11.hex"
+Finished building: default.size.stdout
+arm-none-eabi-objcopy  -O binary Lab11.elf  "Lab11.bin"
+ 
+Finished building: Lab11.hex
+ 
+Finished building: Lab11.list
+Finished building: Lab11.bin
+ 
+ 
+
+11:32:49 Build Finished. 0 errors, 1 warnings. (took 1s.126ms)
+

@@ -1,35 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <section name="Workbench">
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
-		<item key="selection" value="initial_speed"/>
+		<item key="selection" value="LED0"/>
 		<item key="wrap" value="true"/>
 		<item key="casesensitive" value="true"/>
 		<item key="wholeword" value="false"/>
 		<item key="incremental" value="false"/>
 		<item key="isRegEx" value="false"/>
 		<list key="findhistory">
-			<item value="initial_speed"/>
-			<item value="LCD_ShowString"/>
-			<item value="speed"/>
-			<item value="Draw"/>
-			<item value="Draw_Point"/>
-			<item value="y_coordinate"/>
-			<item value="x_coordinate"/>
-			<item value="htim2"/>
-			<item value="screen_norm_print"/>
-			<item value="state_num"/>
-			<item value="lcd_draw_bline"/>
-			<item value="i"/>
-			<item value="key"/>
-			<item value="KEY_Scan"/>
-			<item value="LCD"/>
+			<item value="LED0"/>
+			<item value="screen"/>
+			<item value="normal"/>
+			<item value="You are dead"/>
+			<item value="handle"/>
+			<item value="c"/>
+			<item value="circle_rectangle_collision"/>
+			<item value="norm"/>
+			<item value="temp"/>
+			<item value="y_coordinate = "/>
+			<item value="return -1"/>
+			<item value="-1"/>
+			<item value="TURN"/>
+			<item value="handle_jump"/>
+			<item value="hit"/>
 		</list>
 		<list key="replacehistory">
 		</list>
 	</section>
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog_dialogBounds">
-		<item key="DIALOG_X_ORIGIN" value="1828"/>
-		<item key="DIALOG_Y_ORIGIN" value="656"/>
+		<item key="DIALOG_X_ORIGIN" value="1868"/>
+		<item key="DIALOG_Y_ORIGIN" value="514"/>
 		<item key="DIALOG_WIDTH" value="463"/>
 		<item key="DIALOG_HEIGHT" value="511"/>
 		<item key="DIALOG_FONT_NAME" value="1|Microsoft YaHei UI|9.0|0|WINDOWS|1|-18|0|0|0|400|0|0|0|1|0|0|0|0|Microsoft YaHei UI"/>
